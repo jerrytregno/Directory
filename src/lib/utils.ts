@@ -25,6 +25,16 @@ export function domainFromUrl(value: string) {
   }
 }
 
+export function websiteLogoUrl(value: string) {
+  try {
+    const host = new URL(value).hostname;
+    if (!host) return null;
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128`;
+  } catch {
+    return null;
+  }
+}
+
 export function buildSearchText(values: Array<string | null | undefined>) {
   return values
     .filter((value): value is string => Boolean(value && value.trim()))

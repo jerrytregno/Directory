@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ListingLogo } from "@/components/ListingLogo";
 import type { ListingCardData } from "@/lib/queries";
-import { domainFromUrl } from "@/lib/utils";
+import { domainFromUrl, websiteLogoUrl } from "@/lib/utils";
 
 const pricingStyles: Record<string, string> = {
   Free: "bg-mist text-pine",
@@ -14,7 +14,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
     <article className="flex h-full flex-col rounded-2xl border border-line bg-white p-5 transition hover:-translate-y-0.5 hover:border-pine/40">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
-          <ListingLogo name={listing.name} logoUrl={listing.logoUrl} />
+          <ListingLogo name={listing.name} logoUrl={websiteLogoUrl(listing.websiteUrl)} />
           <div className="min-w-0">
             <h3 className="truncate text-base font-semibold text-ink">
               <Link href={`/listing/${listing.slug}`} className="hover:text-pine">

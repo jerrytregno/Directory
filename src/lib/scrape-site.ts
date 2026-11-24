@@ -114,6 +114,23 @@ function firstMatch(html: string, pattern: RegExp) {
   return match?.[1] ? decode(match[1]) : "";
 }
 
+function siteIcon(html: string) {
+  const icons = [...html.matchAll(/<link\b[^>]*>/gi)]
+    .map((match) => {
+      const tag = match[0];
+      const rel = (tag.match(/\brel=["']([^"']+)["']/i)?.[1] || "").toLowerCase();
+      const href = tag.match(/\bhref=["']([^"']+)["']/i)?.[1] || "";
+      if (!href) return null;
+      const score = rel.includes("apple-touch-icon") ? 3 : rel === "icon" || rel.includes("shortcut icon") ? 2 : rel.includes("icon") ? 1 : 0;
+      if (!score) return null;
+      const size = Number(tag.match(/\bsizes=["'](\d+)/i)?.[1] || 0);
+      return { href, score, size };
+    })
+    .filter((icon): icon is { href: string; score: number; size: number } => Boolean(icon))
+    .sort((a, b) => b.score - a.score || b.size - a.size);
+  return icons[0]?.href || "";
+}
+
 export async function scrapeWebsite(raw: string): Promise<ScrapedSite> {
   const start = cleanUrl(raw);
   const { response, url } = await readPublic(start, "text/html,application/xhtml+xml");
@@ -135,7 +152,7 @@ export async function scrapeWebsite(raw: string): Promise<ScrapedSite> {
   const twitter = absolute(firstMatch(html, /href=["'](https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/[^"'#?\s]+)["']/i), url);
   const linkedin = absolute(firstMatch(html, /href=["'](https?:\/\/(?:www\.)?linkedin\.com\/[^"'#?\s]+)["']/i), url);
   const contactEmail = firstMatch(html, /href=["']mailto:([^"'?\s]+)["']/i).slice(0, 120);
-  const logo = absolute(meta(html, "og:image") || firstMatch(html, /<link[^>]+rel=["'][^"']*icon[^"']*["'][^>]+href=["']([^"']+)["']/i), url);
+  const logo = absolute(siteIcon(html) || new URL("/favicon.ico", url).toString(), url);
 
   if (name.length < 2 && slogan.length < 12) throw new Error("That page did not include a name or description to use.");
 

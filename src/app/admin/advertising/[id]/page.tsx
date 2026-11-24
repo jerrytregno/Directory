@@ -197,7 +197,7 @@ export default async function AdminAdvertisingDetailPage({
                 <input type="checkbox" name="active" defaultChecked={campaign.active} className="h-4 w-4 accent-pine" />
                 Campaign is active
               </label>
-              <div className="rounded-xl bg-[#f6f6f4] px-4 py-3 text-sm">
+              <div className="rounded-xl bg-[#f3ebe1] px-4 py-3 text-sm">
                 <p>
                   {campaign.impressions} impressions · {campaign.clicks} clicks · {rate === null ? "CTR —" : `${rate.toFixed(1)}% CTR`}
                 </p>

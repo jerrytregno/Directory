@@ -16,7 +16,7 @@ function Glyph({ d, size = 20 }: { d: string; size?: number }) {
 }
 
 function Icon({ children }: { children: ReactNode }) {
-  return <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#f3eeff] text-glow">{children}</span>;
+  return <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#f6e4d2] text-glow">{children}</span>;
 }
 
 export default async function HomePage() {
@@ -33,7 +33,7 @@ export default async function HomePage() {
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-ink/80">
             Works for AI tools, businesses and content. Doesn&apos;t limit SaaSListingHub to one category.
           </p>
-          <form action="/search" className="mx-auto mt-8 flex w-full max-w-2xl items-center gap-2 rounded-full border border-[#ece7ff] bg-white p-2 text-left shadow-[0_22px_50px_rgba(109,74,255,0.16)]">
+          <form action="/search" className="mx-auto mt-8 flex w-full max-w-2xl items-center gap-2 rounded-full border border-[#eadccb] bg-white p-2 text-left shadow-[0_22px_50px_rgba(166,78,32,0.16)]">
             <label className="sr-only" htmlFor="home-search">
               Search SaaSListingHub
             </label>
@@ -55,7 +55,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="bg-[linear-gradient(180deg,#f7f4ff_0%,#ffffff_55%)] px-5 py-16 sm:px-8">
+      <section className="bg-[linear-gradient(180deg,#f7efe6_0%,#fbf7f2_55%)] px-5 py-16 sm:px-8">
         <div className="mx-auto w-full max-w-6xl text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-glow">Submit your product</p>
           <h2 className="mx-auto mt-3 max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
@@ -71,7 +71,7 @@ export default async function HomePage() {
               ["Review", "An admin checks the listing before anyone can see it.", "M6 12l4 4 8-8"],
               ["Publish", "Approved listings go live in their category.", "M5 19V5h10l4 4v10H5z"],
             ].map(([title, body, icon]) => (
-              <article key={title} className="rounded-2xl border border-[#ece7ff] bg-white px-5 py-6 shadow-[0_18px_40px_rgba(109,74,255,0.08)]">
+              <article key={title} className="rounded-2xl border border-[#eadccb] bg-white px-5 py-6 shadow-[0_18px_40px_rgba(166,78,32,0.1)]">
                 <Icon>
                   <Glyph d={icon} />
                 </Icon>
@@ -85,7 +85,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-y border-line bg-white px-5 py-16 sm:px-8">
+      <section className="border-y border-line bg-[#fffaf4] px-5 py-16 sm:px-8">
         <div className="mx-auto w-full max-w-6xl">
           <div className="max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-glow">Advertise</p>
@@ -128,13 +128,13 @@ export default async function HomePage() {
             </p>
           </div>
           <aside className="flex flex-col justify-end gap-4">
-            <p className="rounded-3xl bg-[#f3eeff] px-6 py-6 text-xl font-extrabold leading-snug">Published stories from people building with AI.</p>
+            <p className="rounded-3xl bg-[#f6e4d2] px-6 py-6 text-xl font-extrabold leading-snug">Published stories from people building with AI.</p>
             <p className="px-2 text-sm leading-6 text-muted">Read what is already public. Send an original article from your account. Pending pieces stay private until an admin publishes them. Submitting an article is free.</p>
           </aside>
         </div>
       </section>
 
-      <section className="border-t border-line bg-white px-5 py-16 sm:px-8 lg:py-20">
+      <section className="border-t border-line bg-[#fffaf4] px-5 py-16 sm:px-8 lg:py-20">
         <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[0.7fr_1.3fr]">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-glow">FAQ</p>
@@ -155,10 +155,10 @@ export default async function HomePage() {
               ["How does advertising work?", "Send a request for a featured listing, category sponsorship, banner, newsletter mention, sponsored article, or product spotlight. An admin reviews it and turns the campaign on by hand."],
               ["How do guest articles get published?", "Sign in and send an original article. It stays private until an admin publishes it."],
             ].map(([question, answer]) => (
-              <details key={question} className="group rounded-2xl border border-[#ece7ff] bg-[#fbfaff] px-5 py-4 open:bg-white open:shadow-[0_14px_32px_rgba(109,74,255,0.08)]">
+              <details key={question} className="group rounded-2xl border border-[#eadccb] bg-[#fbf6f0] px-5 py-4 open:bg-white open:shadow-[0_14px_32px_rgba(166,78,32,0.1)]">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold">
                   {question}
-                  <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f3eeff] text-lg leading-none text-glow group-open:rotate-45">+</span>
+                  <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f6e4d2] text-lg leading-none text-glow group-open:rotate-45">+</span>
                 </summary>
                 <p className="mt-3 pr-10 text-sm leading-6 text-muted">{answer}</p>
               </details>

@@ -18,7 +18,7 @@ export function GuestCard({ post, sponsored = false }: { post: GuestPost; sponso
         {post.featuredImage ? (
           <img src={post.featuredImage} alt={post.title} className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full items-end bg-[linear-gradient(135deg,#eef3ff,#f6f6f4_55%,#f3eefe)] p-4 text-sm font-semibold text-pine">
+          <div className="flex h-full items-end bg-[linear-gradient(135deg,#f6e4d2,#f3ebe1_55%,#f8e7dc)] p-4 text-sm font-semibold text-pine">
             {post.category || "Guest post"}
           </div>
         )}

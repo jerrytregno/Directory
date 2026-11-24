@@ -100,7 +100,7 @@ export function SiteHeader({ user }: { user: HeaderUser }) {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-transparent bg-[#f6f6f4]/85 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-transparent bg-[#f3ebe1]/85 backdrop-blur">
       <div className="relative flex h-[72px] w-full items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6">
         <Logo />
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-5 lg:flex">
@@ -143,7 +143,7 @@ export function SiteHeader({ user }: { user: HeaderUser }) {
         </div>
       </div>
       {open ? (
-        <div className="border-t border-line bg-[#f6f6f4] px-4 py-4 lg:hidden">
+        <div className="border-t border-line bg-[#f3ebe1] px-4 py-4 lg:hidden">
           <div className="mx-auto flex max-w-6xl flex-col gap-1">
             {links.map((link) => {
               const href = link.href === "/submit" && !user ? "/signup?next=/submit" : link.href;

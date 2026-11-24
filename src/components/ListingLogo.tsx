@@ -9,7 +9,7 @@ export function ListingLogo({
 }) {
   const dim = size === "lg" ? "h-16 w-16 rounded-2xl text-xl" : "h-12 w-12 rounded-xl text-base";
   if (logoUrl) {
-    return <img src={logoUrl} alt={`${name} logo`} className={`${dim} border border-line bg-white object-cover`} />;
+    return <img src={logoUrl} alt={`${name} logo`} className={`${dim} border border-line bg-white object-contain p-1.5`} />;
   }
 
   const tones = ["bg-mist text-pine", "bg-sand text-amber", "bg-stone-100 text-stone-700"];

@@ -9,7 +9,7 @@ import { SCRAPE_DRAFT_KEY, type ScrapeDraft } from "@/components/ScrapeReview";
 import { Field } from "@/components/Field";
 import { ListingLogo } from "@/components/ListingLogo";
 import { Notice } from "@/components/Notice";
-import { BUSINESS_TYPES, INDUSTRIES, PRICING_MODELS } from "@/lib/constants";
+import { INDUSTRIES, PRICING_MODELS } from "@/lib/constants";
 import { buttonClass, inputClass } from "@/lib/styles";
 import { initialActionState } from "@/lib/types";
 
@@ -80,31 +80,15 @@ export function ListingForm({
           <input id="websiteUrl" name="websiteUrl" type="url" required defaultValue={listing?.websiteUrl} placeholder="https://" className={inputClass} />
         </Field>
         <Field label="Category" htmlFor="categoryId" error={errors.categoryId}>
-          <select id="categoryId" name="categoryId" required defaultValue={listing?.categoryId ?? ""} className={inputClass}>
-            <option value="" disabled>
-              Select a category
-            </option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+          <input
+            id="categoryId"
+            name="categoryId"
+            defaultValue={categories.find((category) => category.id === listing?.categoryId)?.name ?? ""}
+            className={inputClass}
+          />
         </Field>
         <Field label="Business type" htmlFor="businessType" error={errors.businessType}>
-          <select id="businessType" name="businessType" required defaultValue={listing?.businessType ?? ""} className={inputClass}>
-            <option value="" disabled>
-              Select a type
-            </option>
-            {listing?.businessType && !(BUSINESS_TYPES as readonly string[]).includes(listing.businessType) ? (
-              <option value={listing.businessType}>{listing.businessType}</option>
-            ) : null}
-            {BUSINESS_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
+          <input id="businessType" name="businessType" maxLength={40} defaultValue={listing?.businessType ?? ""} className={inputClass} />
         </Field>
         {mode === "admin" ? (
           <>
@@ -252,21 +236,49 @@ export function ListingForm({
   );
 }
 
+function websiteAddress(value: string) {
+  const trimmed = value.trim().replace(/\s/g, "");
+  if (!trimmed) return "https://";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/+/, "")}`;
+}
+
 function CreateListingForm() {
   const router = useRouter();
-  const [launchUrl, setLaunchUrl] = useState("");
+  const [launchUrl, setLaunchUrl] = useState("https://");
   const [scraping, setScraping] = useState(false);
   const [scrapeError, setScrapeError] = useState("");
 
+  function updateWebsite(value: string) {
+    if (!value.startsWith("http://") && !value.startsWith("https://")) {
+      setLaunchUrl(websiteAddress(value));
+      return;
+    }
+    setLaunchUrl(value);
+  }
+
   async function readWebsite(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const address = websiteAddress(launchUrl);
+    let hostname = "";
+    try {
+      hostname = new URL(address).hostname;
+    } catch {
+      hostname = "";
+    }
+    if (!hostname || !hostname.includes(".")) {
+      setScrapeError("Enter a website name after https://");
+      setLaunchUrl(address === "https://" ? "https://" : address);
+      return;
+    }
+    setLaunchUrl(address);
     setScraping(true);
     setScrapeError("");
     try {
       const response = await fetch("/api/scrape", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: launchUrl }),
+        body: JSON.stringify({ url: address }),
       });
       const data = (await response.json()) as {
         error?: string;
@@ -287,7 +299,7 @@ function CreateListingForm() {
       }
       const draft: ScrapeDraft = {
         name: data.name || "",
-        websiteUrl: data.websiteUrl || launchUrl,
+        websiteUrl: data.websiteUrl || address,
         shortDescription: data.slogan || "",
         fullDescription: data.description || "",
         githubUrl: data.githubUrl || "",
@@ -312,17 +324,23 @@ function CreateListingForm() {
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-glow">Your website</p>
         <h2 className="mt-3 text-4xl font-extrabold tracking-tight">Add a site to SaaSListingHub</h2>
         <p className="mt-3 text-base leading-7 text-muted">Enter the address. The next page lists only what that page includes.</p>
-        <form onSubmit={readWebsite} className="mt-6 flex flex-col gap-3 sm:flex-row">
+        <form noValidate onSubmit={readWebsite} className="mt-6 flex flex-col gap-3 sm:flex-row">
           <label className="sr-only" htmlFor="launch-url">
-            Website URL
+            Website name
           </label>
           <input
             id="launch-url"
-            type="url"
-            required
+            type="text"
+            inputMode="url"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             value={launchUrl}
-            onChange={(event) => setLaunchUrl(event.target.value)}
-            placeholder="https://blazly.ai"
+            onChange={(event) => updateWebsite(event.target.value)}
+            onFocus={(event) => {
+              const end = event.currentTarget.value.length;
+              event.currentTarget.setSelectionRange(end, end);
+            }}
             className={`${inputClass} h-14 flex-1 rounded-2xl px-4 text-base`}
           />
           <button type="submit" className={`${buttonClass} h-14 rounded-2xl px-6`} disabled={scraping}>

@@ -5,7 +5,7 @@ import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { StatusBadge } from "@/components/StatusBadge";
 import { requireUser } from "@/lib/auth";
 import { getUserListings } from "@/lib/queries";
-import { domainFromUrl } from "@/lib/utils";
+import { domainFromUrl, websiteLogoUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +46,7 @@ export default async function ProfilePage() {
             <li key={website.id} className="rounded-2xl border border-line bg-white p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-start gap-3">
-                  <ListingLogo name={website.name} logoUrl={website.logoUrl} />
+                  <ListingLogo name={website.name} logoUrl={websiteLogoUrl(website.websiteUrl)} />
                   <div className="min-w-0">
                     <h2 className="truncate text-base font-semibold">
                       <Link href={`/listing/${website.slug}`} className="hover:text-pine">

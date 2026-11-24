@@ -38,14 +38,14 @@ export default function SaasDirectoryArticlePage() {
           max-width: none;
           margin: 0;
           padding: 2.5rem 1.25rem 4.5rem;
-          color: #171717;
+          color: #23170f;
         }
         @media (min-width: 768px) {
           .rank-article { padding: 3rem 2.5rem 5rem; }
         }
         .rank-article .kicker {
           margin: 0;
-          color: #1d56e8;
+          color: #c65a22;
           font-size: 0.8rem;
           font-weight: 700;
           letter-spacing: 0.14em;
@@ -62,7 +62,7 @@ export default function SaasDirectoryArticlePage() {
           margin: 1.25rem 0 0;
           font-size: 1.2rem;
           line-height: 1.7;
-          color: #3a3a3a;
+          color: #5c4b40;
         }
         .rank-article h2 {
           margin: 2.6rem 0 0.75rem;
@@ -82,7 +82,7 @@ export default function SaasDirectoryArticlePage() {
         .rank-article ul,
         .rank-article ol { margin: 0.85rem 0 0; padding-left: 1.25rem; }
         .rank-article li + li { margin-top: 0.45rem; }
-        .rank-article a { color: #1d56e8; }
+        .rank-article a { color: #c65a22; }
         .rank-article table {
           width: 100%;
           margin-top: 1rem;
@@ -91,7 +91,7 @@ export default function SaasDirectoryArticlePage() {
         }
         .rank-article th,
         .rank-article td {
-          border-bottom: 1px solid #e7e7e4;
+          border-bottom: 1px solid #e4d5c4;
           padding: 0.8rem 0.6rem;
           text-align: left;
           vertical-align: top;
@@ -101,7 +101,7 @@ export default function SaasDirectoryArticlePage() {
           margin-top: 2rem;
           padding: 1.1rem 1.2rem;
           border-radius: 1rem;
-          background: #eef3ff;
+          background: #f6e4d2;
         }
       `}</style>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd).replace(/</g, "\\u003c") }} />

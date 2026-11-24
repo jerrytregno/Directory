@@ -17,7 +17,7 @@ const account = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-line/80 bg-[#f6f6f4]">
+    <footer className="mt-auto border-t border-line/80 bg-[#f3ebe1]">
       <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <Logo />

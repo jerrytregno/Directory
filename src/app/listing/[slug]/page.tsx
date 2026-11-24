@@ -12,7 +12,7 @@ import { getPublicDb } from "@/lib/firebase-db";
 import { getListingBySlug, getRelatedListings } from "@/lib/queries";
 import { tryUserFirestore } from "@/lib/request-db";
 import { buttonClass } from "@/lib/styles";
-import { domainFromUrl, formatDate } from "@/lib/utils";
+import { domainFromUrl, formatDate, websiteLogoUrl } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -92,7 +92,7 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="rounded-[1.75rem] bg-white p-6 shadow-[0_16px_40px_rgba(22,20,28,0.06)] ring-1 ring-black/5 sm:p-8">
           <div className="flex items-start gap-4">
-            <ListingLogo name={listing.name} logoUrl={listing.logoUrl} size="lg" />
+            <ListingLogo name={listing.name} logoUrl={websiteLogoUrl(listing.websiteUrl)} size="lg" />
             <div>
               <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
                 {listing.name}

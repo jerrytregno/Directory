@@ -1,7 +1,7 @@
 import type { Firestore } from "firebase/firestore";
 import { listingSchema, type ListingInput } from "@/lib/validators";
 import { deleteLogo, saveGallery, saveLogo } from "@/lib/uploads";
-import { findWebsiteOwner, getCategory, slugExists } from "@/lib/store";
+import { findWebsiteOwner, getCategory, listCategories, slugExists } from "@/lib/store";
 import { buildSearchText, fieldErrorsFromZod, formString, slugify, websiteKey } from "@/lib/utils";
 import type { ActionState } from "@/lib/types";
 
@@ -35,9 +35,11 @@ export function readListingForm(formData: FormData) {
 }
 
 export async function buildListingWrite(db: Firestore, input: ListingInput, owner: { name: string; email: string }) {
-  const category = input.categoryId ? await getCategory(db, input.categoryId) : null;
-  if (input.categoryId && !category) {
-    return { ok: false as const, error: "Choose a valid category." };
+  const categoryText = input.categoryId.trim();
+  let category = categoryText ? await getCategory(db, categoryText) : null;
+  if (categoryText && !category) {
+    const categories = await listCategories(db);
+    category = categories.find((item) => item.name.toLowerCase() === categoryText.toLowerCase()) ?? null;
   }
 
   let key = "";
@@ -81,7 +83,7 @@ export async function buildListingWrite(db: Firestore, input: ListingInput, owne
       input.githubUrl,
       input.demoVideoUrl,
       key,
-      category?.name ?? "",
+      category?.name ?? categoryText,
       input.businessType,
       input.pricingModel,
       owner.name,
