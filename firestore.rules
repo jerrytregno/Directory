@@ -1,0 +1,252 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() && (
+        request.auth.token.email == "admin@blazly.com" ||
+        (
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
+        )
+      );
+    }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAdmin() || (
+        isOwner(userId) &&
+        request.resource.data.role == "user" &&
+        request.resource.data.email == request.auth.token.email &&
+        request.resource.data.name is string
+      );
+      allow update: if isAdmin() || (
+        isOwner(userId) &&
+        request.resource.data.role == resource.data.role &&
+        request.resource.data.email == resource.data.email
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /listings/{listingId} {
+      allow read: if resource.data.status == "approved" || isAdmin() || isOwner(resource.data.userId);
+
+      allow create: if isAdmin() || (
+        signedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.status == "pending" &&
+        request.resource.data.featured == false &&
+        request.resource.data.slug == listingId
+      );
+
+      allow update: if isAdmin() || (
+        isOwner(resource.data.userId) &&
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.slug == resource.data.slug &&
+        request.resource.data.status == "pending" &&
+        request.resource.data.featured == false
+      ) || (
+        resource.data.status == "approved" &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(["viewCount"]) &&
+        request.resource.data.viewCount == resource.data.viewCount + 1
+      ) || (
+        resource.data.status == "approved" &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(["clickCount"]) &&
+        request.resource.data.clickCount == resource.data.get("clickCount", 0) + 1
+      ) || (
+        resource.data.status == "approved" &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(["viewCount", "uniqueVisitors"]) &&
+        request.resource.data.viewCount == resource.data.viewCount + 1 &&
+        request.resource.data.uniqueVisitors == resource.data.get("uniqueVisitors", 0) + 1
+      );
+
+      allow delete: if isAdmin() || isOwner(resource.data.userId);
+
+      match /reviews/{userId} {
+        allow read: if resource.data.status == "published" || isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId)
+          && request.resource.data.userId == userId
+          && request.resource.data.listingId == listingId
+          && request.resource.data.rating >= 1
+          && request.resource.data.rating <= 5
+          && request.resource.data.status == "published"
+          && request.resource.data.body is string
+          && request.resource.data.body.size() >= 10
+          && request.resource.data.body.size() <= 1000;
+        allow update: if isAdmin() || (
+          isOwner(userId) &&
+          request.resource.data.userId == resource.data.userId &&
+          request.resource.data.listingId == resource.data.listingId
+        );
+        allow delete: if isAdmin() || isOwner(userId);
+      }
+    }
+
+    match /bookmarks/{bookmarkId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && bookmarkId == request.auth.uid + "_" + request.resource.data.listingId;
+      allow delete: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    match /claims/{claimId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == "pending"
+        && claimId == request.auth.uid + "_" + request.resource.data.listingId;
+      allow update: if isAdmin() || (
+        signedIn() &&
+        resource.data.userId == request.auth.uid &&
+        resource.data.status != "approved" &&
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.status == "pending"
+      );
+    }
+
+    match /reviewReports/{reportId} {
+      allow read: if isAdmin();
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
+    match /listingDays/{dayId} {
+      allow read: if true;
+      allow create: if request.resource.data.listingId is string && request.resource.data.day is string;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(["views", "uniques", "clicks"]);
+    }
+
+    match /listingVisitors/{visitorId} {
+      allow get: if true;
+      allow create: if request.resource.data.listingId is string && request.resource.data.visitorId is string;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(["lastView"]);
+    }
+
+    match /websiteKeys/{key} {
+      allow read: if signedIn();
+      allow create: if isAdmin() || (
+        signedIn() &&
+        request.resource.data.listingId is string &&
+        request.resource.data.userId == request.auth.uid
+      );
+      allow update, delete: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    match /slugs/{slug} {
+      allow read: if signedIn();
+      allow create: if isAdmin() || (signedIn() && request.resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    match /guestPosts/{postId} {
+      allow read: if resource.data.status == "published" || isAdmin() || isOwner(resource.data.authorId);
+
+      allow create: if signedIn()
+        && request.auth.uid == request.resource.data.authorId
+        && request.resource.data.postId == postId
+        && request.resource.data.status in ["draft", "submitted"]
+        && request.resource.data.featured == false
+        && request.resource.data.title is string
+        && request.resource.data.slug is string
+        && request.resource.data.content is string;
+
+      allow update: if isAdmin() || (
+        isOwner(resource.data.authorId)
+        && resource.data.status in ["draft", "submitted", "rejected"]
+        && request.resource.data.status in ["draft", "submitted"]
+        && request.resource.data.authorId == resource.data.authorId
+        && request.resource.data.postId == resource.data.postId
+        && request.resource.data.slug == resource.data.slug
+        && request.resource.data.featured == resource.data.featured
+        && request.resource.data.adminFeedback == resource.data.adminFeedback
+        && request.resource.data.publishedAt == resource.data.publishedAt
+        && request.resource.data.scheduledAt == resource.data.scheduledAt
+      );
+
+      allow delete: if isAdmin() || (
+        isOwner(resource.data.authorId) && resource.data.status == "draft"
+      );
+    }
+
+    match /guestSlugs/{slug} {
+      allow read: if signedIn();
+      allow create, update: if isAdmin() || (
+        signedIn() && request.resource.data.authorId == request.auth.uid
+      );
+      allow delete: if isAdmin() || (signedIn() && resource.data.authorId == request.auth.uid);
+    }
+
+    match /advertising_requests/{requestId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid && resource.data.userId != "");
+      allow create: if request.resource.data.status == "pending"
+        && request.resource.data.requestId == requestId
+        && request.resource.data.companyName is string
+        && request.resource.data.email is string
+        && request.resource.data.advertisingTypes is list
+        && (request.resource.data.userId == "" || (signedIn() && request.resource.data.userId == request.auth.uid));
+      allow update, delete: if isAdmin();
+    }
+
+    match /advertising_campaigns/{campaignId} {
+      allow read: if isAdmin() || resource.data.active == true;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        resource.data.active == true
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["impressions"])
+        && request.resource.data.impressions == resource.data.get("impressions", 0) + 1
+      ) || (
+        resource.data.active == true
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["clicks"])
+        && request.resource.data.clicks == resource.data.get("clicks", 0) + 1
+      );
+    }
+
+    match /advertising_visitors/{visitorId} {
+      allow read: if isAdmin();
+      allow create: if request.resource.data.campaignId is string && request.resource.data.visitorId is string;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(["lastImpression"])
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(["lastClick"]);
+      allow delete: if isAdmin();
+    }
+
+    match /advertising_days/{dayId} {
+      allow read: if isAdmin();
+      allow create: if request.resource.data.campaignId is string && request.resource.data.day is string;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(["impressions"])
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(["clicks"]);
+      allow delete: if isAdmin();
+    }
+
+    match /notifications/{noteId} {
+      allow read: if isAdmin() || isOwner(resource.data.userId);
+      allow create: if (
+        isAdmin()
+        && request.resource.data.userId is string
+        && request.resource.data.message is string
+        && request.resource.data.read == false
+      ) || (
+        signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.kind == "submitted"
+        && request.resource.data.read == false
+        && request.resource.data.message is string
+      );
+      allow update: if isOwner(resource.data.userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["read"])
+        && request.resource.data.read == true;
+      allow delete: if isAdmin();
+    }
+  }
+}
