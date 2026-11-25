@@ -8,7 +8,7 @@ export type DiscoveredTool = {
   pricing: PricingModel;
 };
 
-const MODELS = ["gemini-2.5-flash-lite"];
+const MODELS = ["gemini-3.1-flash-lite"];
 
 function asPricing(value: unknown): PricingModel {
   return PRICING_MODELS.includes(value as PricingModel) ? (value as PricingModel) : "Paid";
