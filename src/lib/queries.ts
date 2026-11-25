@@ -14,6 +14,12 @@ import {
 } from "@/lib/store";
 import { PAGE_SIZE } from "@/lib/constants";
 
+const SYSTEM_ACCOUNTS = new Set(["admin@blazly.com", "submit.preview.blazly@gmail.com"]);
+
+function isMemberAccount(user: { email: string }) {
+  return !SYSTEM_ACCOUNTS.has(user.email.toLowerCase());
+}
+
 export type ListingCardData = {
   id: string;
   name: string;
@@ -393,8 +399,9 @@ const loadAllListings = cache(async () => {
 
 export async function getAdminStats() {
   const [listings, users] = await Promise.all([loadAllListings(), withUserFirestore((db) => listUsers(db))]);
+  const members = users.filter(isMemberAccount);
   return {
-    users: users.length,
+    users: members.length,
     listings: listings.length,
     pending: listings.filter((listing) => listing.status === "pending").length,
     approved: listings.filter((listing) => listing.status === "approved").length,
@@ -441,6 +448,7 @@ export async function getUsers(queryText?: string) {
   for (const listing of listings) counts.set(listing.user.id, (counts.get(listing.user.id) ?? 0) + 1);
   const q = queryText?.trim().toLowerCase();
   const rows = users
+    .filter(isMemberAccount)
     .map((user) => ({ ...user, _count: { listings: counts.get(user.id) ?? 0 } }))
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   if (!q) return rows;

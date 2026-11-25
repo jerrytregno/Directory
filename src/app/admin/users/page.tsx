@@ -18,7 +18,7 @@ export default async function AdminUsersPage({
   return (
     <div>
       <h1 className="text-3xl font-semibold tracking-tight">Users</h1>
-      <p className="mt-2 text-sm text-muted">Everyone who has created an account. Roles control who can review submissions.</p>
+      <p className="mt-2 text-sm text-muted">People who have created an account.</p>
       <form action="/admin/users" className="mt-6 flex flex-col gap-3 sm:flex-row">
         <input className={inputClass} name="q" defaultValue={params.q ?? ""} placeholder="Search name or email" aria-label="Search users" />
         <button className={buttonClass} type="submit">
