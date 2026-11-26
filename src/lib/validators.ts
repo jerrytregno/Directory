@@ -65,7 +65,9 @@ export const listingSchema = z.object({
     .max(180, "Short description must be 180 characters or fewer."),
   fullDescription: z.string().trim().max(5000, "Description must be 5000 characters or fewer."),
   features: z.string().trim().max(2000, "Features must be 2000 characters or fewer."),
+  products: z.string().trim().max(2000, "Products must be 2000 characters or fewer."),
   benefits: z.string().trim().max(2000, "Benefits must be 2000 characters or fewer."),
+  region: z.string().trim().max(80, "Region must be 80 characters or fewer."),
   pricingDetails: z.string().trim().max(1000, "Pricing details must be 1000 characters or fewer."),
   industry: z
     .string()

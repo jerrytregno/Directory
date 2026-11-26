@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SignupForm } from "@/components/AuthForms";
 import { AuthShell } from "@/components/AuthShell";
 import { getSession } from "@/lib/auth";
+import { getFirebaseConfig } from "@/lib/firebase-config";
 import { logout } from "@/lib/actions/auth";
 import { buttonClass, buttonSecondaryClass } from "@/lib/styles";
 import { safeNextPath } from "@/lib/utils";
@@ -52,7 +53,7 @@ export default async function SignupPage({
         </>
       }
     >
-      <SignupForm nextPath={nextPath} />
+      <SignupForm nextPath={nextPath} firebaseConfig={getFirebaseConfig()} />
     </AuthShell>
   );
 }

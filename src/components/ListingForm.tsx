@@ -9,7 +9,7 @@ import { SCRAPE_DRAFT_KEY, type ScrapeDraft } from "@/components/ScrapeReview";
 import { Field } from "@/components/Field";
 import { ListingLogo } from "@/components/ListingLogo";
 import { Notice } from "@/components/Notice";
-import { INDUSTRIES, PRICING_MODELS } from "@/lib/constants";
+import { INDUSTRIES } from "@/lib/constants";
 import { buttonClass, inputClass } from "@/lib/styles";
 import { initialActionState } from "@/lib/types";
 
@@ -20,7 +20,9 @@ export type ListingFormValues = {
   shortDescription: string;
   fullDescription: string;
   features: string;
+  products: string;
   benefits: string;
+  region: string;
   pricingDetails: string;
   industry: string;
   tags: string;
@@ -90,18 +92,11 @@ export function ListingForm({
         <Field label="Business type" htmlFor="businessType" error={errors.businessType}>
           <input id="businessType" name="businessType" maxLength={40} defaultValue={listing?.businessType ?? ""} className={inputClass} />
         </Field>
+        <Field label="Region" htmlFor="region" error={errors.region} hint="Where the business is based, or the places it serves.">
+          <input id="region" name="region" maxLength={80} defaultValue={listing?.region ?? ""} className={inputClass} />
+        </Field>
         {mode === "admin" ? (
           <>
-            <Field label="Pricing model" htmlFor="pricingModel" error={errors.pricingModel} hint="Optional until pricing filters return.">
-              <select id="pricingModel" name="pricingModel" defaultValue={listing?.pricingModel ?? ""} className={inputClass}>
-                <option value="">Not set</option>
-                {PRICING_MODELS.map((model) => (
-                  <option key={model} value={model}>
-                    {model}
-                  </option>
-                ))}
-              </select>
-            </Field>
             <Field label="Industry" htmlFor="industry" error={errors.industry} hint="Optional. Kept for a later subcategory layer.">
               <select id="industry" name="industry" defaultValue={listing?.industry ?? ""} className={inputClass}>
                 <option value="">Not set</option>
@@ -134,17 +129,15 @@ export function ListingForm({
       <Field label="Detailed description" htmlFor="fullDescription" error={errors.fullDescription}>
         <textarea id="fullDescription" name="fullDescription" maxLength={5000} rows={6} defaultValue={listing?.fullDescription} className={inputClass} />
       </Field>
+      <Field label="Products" htmlFor="products" error={errors.products} hint="Optional. Put one product or service on each line.">
+        <textarea id="products" name="products" maxLength={2000} rows={5} defaultValue={listing?.products} className={inputClass} />
+      </Field>
       <Field label="Features" htmlFor="features" error={errors.features} hint="Optional. Put one feature on each line.">
         <textarea id="features" name="features" maxLength={2000} rows={5} defaultValue={listing?.features} className={inputClass} />
       </Field>
       <Field label="Benefits" htmlFor="benefits" error={errors.benefits} hint="Optional. Put one benefit on each line.">
         <textarea id="benefits" name="benefits" maxLength={2000} rows={4} defaultValue={listing?.benefits} className={inputClass} />
       </Field>
-      {mode === "admin" ? (
-        <Field label="Pricing details" htmlFor="pricingDetails" error={errors.pricingDetails} hint="Optional. Describe the product's own pricing. Submitting to SaaSListingHub stays free.">
-          <textarea id="pricingDetails" name="pricingDetails" maxLength={1000} rows={3} defaultValue={listing?.pricingDetails} className={inputClass} />
-        </Field>
-      ) : null}
       <Field label="Tags" htmlFor="tags" error={errors.tags} hint="Optional. Separate keywords with commas.">
         <input id="tags" name="tags" maxLength={200} defaultValue={listing?.tags} className={inputClass} />
       </Field>
@@ -292,6 +285,13 @@ function CreateListingForm() {
         linkedinUrl?: string;
         contactEmail?: string;
         logoUrl?: string;
+        businessType?: string;
+        industry?: string;
+        region?: string;
+        products?: string;
+        benefits?: string;
+        tags?: string;
+        category?: string;
       };
       if (!response.ok) {
         setScrapeError(data.error || "Could not read that website.");
@@ -308,6 +308,13 @@ function CreateListingForm() {
         linkedinUrl: data.linkedinUrl || "",
         contactEmail: data.contactEmail || "",
         logoUrl: data.logoUrl || "",
+        businessType: data.businessType || "",
+        industry: data.industry || "",
+        region: data.region || "",
+        products: data.products || "",
+        benefits: data.benefits || "",
+        tags: data.tags || "",
+        category: data.category || "",
       };
       sessionStorage.setItem(SCRAPE_DRAFT_KEY, JSON.stringify(draft));
       router.push("/submit/review");
@@ -323,7 +330,7 @@ function CreateListingForm() {
       <section className="rounded-3xl border border-line bg-white p-6 sm:p-8">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-glow">Your website</p>
         <h2 className="mt-3 text-4xl font-extrabold tracking-tight">Add a site to SaaSListingHub</h2>
-        <p className="mt-3 text-base leading-7 text-muted">Enter the address. The next page lists only what that page includes.</p>
+        <p className="mt-3 text-base leading-7 text-muted">Enter the address. We read the business, description, products, and region, then you can edit them.</p>
         <form noValidate onSubmit={readWebsite} className="mt-6 flex flex-col gap-3 sm:flex-row">
           <label className="sr-only" htmlFor="launch-url">
             Website name
@@ -344,7 +351,7 @@ function CreateListingForm() {
             className={`${inputClass} h-14 flex-1 rounded-2xl px-4 text-base`}
           />
           <button type="submit" className={`${buttonClass} h-14 rounded-2xl px-6`} disabled={scraping}>
-            {scraping ? "Reading..." : "Continue"}
+            {scraping ? "Reading the site..." : "Continue"}
           </button>
         </form>
         {scrapeError ? <p className="mt-3 text-sm text-rose">{scrapeError}</p> : null}

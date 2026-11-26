@@ -1,15 +1,11 @@
 import Link from "next/link";
 import { ListingLogo } from "@/components/ListingLogo";
 import type { ListingCardData } from "@/lib/queries";
-import { domainFromUrl, websiteLogoUrl } from "@/lib/utils";
-
-const pricingStyles: Record<string, string> = {
-  Free: "bg-mist text-pine",
-  Freemium: "bg-sand text-amber",
-  Paid: "bg-stone-100 text-stone-700",
-};
+import { domainFromUrl, toolPath, websiteLogoUrl } from "@/lib/utils";
 
 export function ListingCard({ listing }: { listing: ListingCardData }) {
+  const domain = domainFromUrl(listing.websiteUrl);
+  const websiteHref = toolPath(listing.websiteUrl) ?? listing.websiteUrl;
   return (
     <article className="flex h-full flex-col rounded-2xl border border-line bg-white p-5 transition hover:-translate-y-0.5 hover:border-pine/40">
       <div className="flex items-start justify-between gap-3">
@@ -26,15 +22,11 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
             </p>
           </div>
         </div>
-        {listing.pricingModel ? (
-          <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${pricingStyles[listing.pricingModel] ?? "bg-stone-100 text-stone-700"}`}>
-            {listing.pricingModel}
-          </span>
-        ) : null}
+        <span className="shrink-0 rounded-full bg-mist px-2.5 py-1 text-xs font-semibold text-pine">Free</span>
       </div>
       <p className="mt-4 line-clamp-2 flex-1 text-sm leading-6 text-stone-600">{listing.shortDescription}</p>
-      <a href={listing.websiteUrl} target="_blank" rel="noopener noreferrer" className="mt-4 truncate text-xs font-medium text-pine hover:underline">
-        {domainFromUrl(listing.websiteUrl)}
+      <a href={websiteHref} className="mt-4 truncate text-xs font-medium text-pine hover:underline">
+        {domain}
       </a>
     </article>
   );

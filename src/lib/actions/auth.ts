@@ -3,7 +3,7 @@
 import { timingSafeEqual } from "crypto";
 import { redirect } from "next/navigation";
 import { clearSession, getSession, setAuthCookies } from "@/lib/auth";
-import { FirebaseAuthError, confirmPasswordReset, sendPasswordReset, signIn, signUp } from "@/lib/firebase-auth";
+import { FirebaseAuthError, confirmPasswordReset, lookupIdToken, sendPasswordReset, signIn, signUp } from "@/lib/firebase-auth";
 import { runWithToken } from "@/lib/firebase-db";
 import { getUser, upsertUserProfile } from "@/lib/store";
 import type { ActionState } from "@/lib/types";
@@ -84,6 +84,40 @@ function passwordMatches(input: string, expected: string) {
   const right = Buffer.from(expected);
   if (left.length !== right.length) return false;
   return timingSafeEqual(left, right);
+}
+
+export async function completeGoogleLogin(input: {
+  idToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  next?: string;
+}): Promise<ActionState> {
+  if (!input.idToken || !input.refreshToken) {
+    return { error: "Google sign-in did not finish. Try again." };
+  }
+
+  try {
+    const profile = await lookupIdToken(input.idToken);
+    if (!profile.providers.includes("google.com")) {
+      return { error: "Continue with the Google account picker." };
+    }
+    const user = await runWithToken(input.idToken, async (db) => {
+      const existing = await getUser(db, profile.localId);
+      const name = existing?.name || profile.name || profile.email.split("@")[0] || "Member";
+      const role = existing?.role === "admin" || profile.email === "admin@blazly.com" ? "admin" : "user";
+      if (existing && existing.email === profile.email && existing.name === name && existing.role === role) return existing;
+      return upsertUserProfile(db, { id: profile.localId, email: profile.email, name, role });
+    });
+    const expiresIn = Number.isFinite(input.expiresIn) && input.expiresIn > 60 ? input.expiresIn : 3600;
+    await setAuthCookies({ ...user, email: profile.email }, input.idToken, input.refreshToken, expiresIn);
+  } catch (error) {
+    if (error instanceof FirebaseAuthError && error.code === "OPERATION_NOT_ALLOWED") {
+      return { error: "Google sign-in is not enabled for this project yet." };
+    }
+    return { error: "Could not sign in with Google. Try again in a moment." };
+  }
+
+  redirect(safeNextPath(input.next));
 }
 
 export async function unlockAdmin(_prev: ActionState, formData: FormData): Promise<ActionState> {

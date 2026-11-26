@@ -13,6 +13,7 @@ import {
   type UserRecord,
 } from "@/lib/store";
 import { PAGE_SIZE } from "@/lib/constants";
+import { websiteKey } from "@/lib/utils";
 
 const SYSTEM_ACCOUNTS = new Set(["admin@blazly.com", "submit.preview.blazly@gmail.com"]);
 
@@ -113,7 +114,7 @@ function textHasTerm(text: string, term: string) {
 
 function listingBelongsToCategory(listing: ListingRecord, category: CategoryRecord) {
   if (listing.categoryId) return listing.categoryId === category.id;
-  const text = [listing.name, listing.shortDescription, listing.fullDescription, listing.features, listing.tags, listing.searchText].join(" ");
+  const text = [listing.name, listing.shortDescription, listing.fullDescription, listing.features, listing.products, listing.region, listing.tags, listing.searchText].join(" ");
   return categoryTerms(category).some((term) => textHasTerm(text, term));
 }
 
@@ -334,6 +335,20 @@ export async function getDirectory(options: {
 
 export async function getCategoryBySlug(slug: string) {
   return getCategory(getPublicDb(), slug);
+}
+
+export async function getListingSlugByDomain(domain: string) {
+  const host = decodeURIComponent(domain).trim().toLowerCase().replace(/^www\./, "");
+  if (!host || host.includes("/") || host.includes("\\") || host.includes("..")) return null;
+  const listings = await loadApproved();
+  const match = listings.find((listing) => {
+    try {
+      return websiteKey(listing.websiteUrl) === host;
+    } catch {
+      return false;
+    }
+  });
+  return match?.slug ?? null;
 }
 
 export const getListingBySlug = cache(async (slug: string) => {

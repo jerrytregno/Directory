@@ -65,6 +65,34 @@ export async function signIn(email: string, password: string) {
   return sessionFrom(data);
 }
 
+export async function lookupIdToken(idToken: string) {
+  const { apiKey } = getFirebaseConfig();
+  const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ idToken }),
+  });
+  const data = (await response.json()) as {
+    users?: Array<{
+      localId?: string;
+      email?: string;
+      displayName?: string;
+      providerUserInfo?: Array<{ providerId?: string }>;
+    }>;
+    error?: { message?: string };
+  };
+  const user = data.users?.[0];
+  if (!response.ok || !user?.localId || !user.email) {
+    throw new FirebaseAuthError(data.error?.message?.split(" ")[0] || "INVALID_ID_TOKEN");
+  }
+  return {
+    localId: user.localId,
+    email: user.email.toLowerCase(),
+    name: user.displayName?.trim() || "",
+    providers: (user.providerUserInfo ?? []).map((item) => item.providerId).filter((item): item is string => Boolean(item)),
+  };
+}
+
 export async function sendPasswordReset(email: string, continueUrl?: string) {
   await postAuth("accounts:sendOobCode", {
     requestType: "PASSWORD_RESET",

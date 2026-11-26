@@ -25,6 +25,14 @@ export function domainFromUrl(value: string) {
   }
 }
 
+export function toolPath(websiteUrl: string) {
+  try {
+    return `/tool/${websiteKey(websiteUrl)}`;
+  } catch {
+    return null;
+  }
+}
+
 export function websiteLogoUrl(value: string) {
   try {
     const host = new URL(value).hostname;

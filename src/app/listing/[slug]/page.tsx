@@ -11,8 +11,8 @@ import { getReview, isBookmarked, listReviews } from "@/lib/community";
 import { getPublicDb } from "@/lib/firebase-db";
 import { getListingBySlug, getRelatedListings } from "@/lib/queries";
 import { tryUserFirestore } from "@/lib/request-db";
-import { buttonClass } from "@/lib/styles";
-import { domainFromUrl, formatDate, websiteLogoUrl } from "@/lib/utils";
+import { buttonClass, buttonSecondaryClass } from "@/lib/styles";
+import { domainFromUrl, formatDate, toolPath, websiteLogoUrl } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -49,6 +49,7 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
   const mine = session ? await tryUserFirestore((db) => getReview(db, listing.id, session.id)) : null;
   const average = reviews.length ? Math.round((reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length) * 10) / 10 : 0;
   const features = lines(listing.features);
+  const products = lines(listing.products);
   const benefits = lines(listing.benefits);
   const tags = listing.tags.split(",").map((tag) => tag.trim()).filter(Boolean);
   const ownsListing = session?.id === listing.userId;
@@ -99,8 +100,8 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
                 {listing.verified ? <span className="ml-3 align-middle rounded-full bg-mist px-2.5 py-1 text-xs font-semibold text-pine">Verified</span> : null}
               </h1>
               <p className="mt-2 text-sm text-muted">
-                {[listing.businessType, listing.pricingModel, listing.industry].filter(Boolean).join(" · ")}
-                {reviews.length > 0 ? `${listing.businessType || listing.pricingModel || listing.industry ? " · " : ""}${average} from ${reviews.length} review${reviews.length === 1 ? "" : "s"}` : ""}
+                {[listing.businessType, "Free", listing.industry].filter(Boolean).join(" · ")}
+                {reviews.length > 0 ? ` · ${average} from ${reviews.length} review${reviews.length === 1 ? "" : "s"}` : ""}
               </p>
               <p className="mt-1 text-sm text-muted">{listing.viewCount} profile views · {listing.uniqueVisitors} unique visitors</p>
             </div>
@@ -116,9 +117,14 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
             </ul>
           ) : null}
           <div className="mt-6 flex flex-wrap gap-3">
-            <a href={`/api/out/${listing.slug}`} className={buttonClass}>
+            <a href={toolPath(listing.websiteUrl) ?? listing.websiteUrl} className={buttonClass}>
               Visit website
             </a>
+            {ownsListing ? (
+              <Link href={`/profile/${listing.id}/edit`} className={buttonSecondaryClass}>
+                Edit
+              </Link>
+            ) : null}
             {listing.status === "approved" ? (
               <>
                 <BookmarkButton listingId={listing.id} slug={listing.slug} saved={saved} />
@@ -137,6 +143,19 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
             <div className="mt-10">
               <h2 className="text-xl font-semibold">About</h2>
               <p className="mt-3 whitespace-pre-wrap text-base leading-7 text-stone-700">{listing.fullDescription}</p>
+            </div>
+          ) : null}
+          {products.length > 0 ? (
+            <div className="mt-10">
+              <h2 className="text-xl font-semibold">Products</h2>
+              <ul className="mt-4 space-y-2">
+                {products.map((product) => (
+                  <li key={product} className="flex gap-3 text-sm leading-6 text-stone-700">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-pine" />
+                    {product}
+                  </li>
+                ))}
+              </ul>
             </div>
           ) : null}
           {features.length > 0 ? (
@@ -165,13 +184,10 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
               </ul>
             </div>
           ) : null}
-          {listing.pricingDetails ? (
-            <div className="mt-10">
-              <h2 className="text-xl font-semibold">Pricing</h2>
-              <p className="mt-3 whitespace-pre-wrap text-base leading-7 text-stone-700">{listing.pricingDetails}</p>
-              <p className="mt-2 text-sm text-muted">Listing this business on SaaSListingHub is free.</p>
-            </div>
-          ) : null}
+          <div className="mt-10">
+            <h2 className="text-xl font-semibold">Pricing</h2>
+            <p className="mt-3 text-base leading-7 text-stone-700">Free</p>
+          </div>
 
           {listing.status === "approved" ? (
             <section className="mt-12">
@@ -217,11 +233,17 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
               <div>
                 <dt className="text-muted">Website</dt>
                 <dd className="mt-1 break-all font-medium">
-                  <a href={`/api/out/${listing.slug}`} className="text-pine hover:underline">
+                  <a href={toolPath(listing.websiteUrl) ?? listing.websiteUrl} className="text-pine hover:underline">
                     {domainFromUrl(listing.websiteUrl)}
                   </a>
                 </dd>
               </div>
+              {listing.region ? (
+                <div>
+                  <dt className="text-muted">Region</dt>
+                  <dd className="mt-1 font-medium">{listing.region}</dd>
+                </div>
+              ) : null}
               {listing.category.name ? (
                 <div>
                   <dt className="text-muted">Category</dt>
@@ -234,12 +256,10 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
                   <time dateTime={listing.createdAt.toISOString()}>{formatDate(listing.createdAt)}</time>
                 </dd>
               </div>
-              {listing.pricingModel ? (
-                <div>
-                  <dt className="text-muted">Pricing</dt>
-                  <dd className="mt-1 font-medium">{listing.pricingModel}</dd>
-                </div>
-              ) : null}
+              <div>
+                <dt className="text-muted">Pricing</dt>
+                <dd className="mt-1 font-medium">Free</dd>
+              </div>
               {listing.contactEmail ? (
                 <div>
                   <dt className="text-muted">Contact</dt>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LoginForm } from "@/components/AuthForms";
 import { AuthShell } from "@/components/AuthShell";
 import { getSession } from "@/lib/auth";
+import { getFirebaseConfig } from "@/lib/firebase-config";
 import { logout } from "@/lib/actions/auth";
 import { buttonClass, buttonSecondaryClass } from "@/lib/styles";
 import { safeNextPath } from "@/lib/utils";
@@ -52,7 +53,7 @@ export default async function LoginPage({
         </>
       }
     >
-      <LoginForm nextPath={nextPath} passwordReset={params.reset === "1"} />
+      <LoginForm nextPath={nextPath} passwordReset={params.reset === "1"} firebaseConfig={getFirebaseConfig()} />
     </AuthShell>
   );
 }

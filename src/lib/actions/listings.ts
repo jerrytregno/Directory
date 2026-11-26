@@ -87,9 +87,8 @@ export async function createListing(_prev: ActionState, formData: FormData): Pro
 
 export async function updateOwnListing(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const session = await getSession();
-  if (!session) redirect("/login?next=/submit");
-
   const id = formString(formData, "id");
+  if (!session) redirect(`/login?next=/profile/${id}/edit`);
   const parsed = readListingForm(formData);
   if (!parsed.ok) return parsed.state;
 
@@ -132,7 +131,7 @@ export async function updateOwnListing(_prev: ActionState, formData: FormData): 
 
   if (!result.ok) return result.state;
   refresh();
-  redirect("/submit?updated=1");
+  redirect("/profile?updated=1");
 }
 
 export async function deleteOwnListing(formData: FormData) {

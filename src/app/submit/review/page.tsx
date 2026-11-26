@@ -14,7 +14,7 @@ export default async function SubmitReviewPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6">
       <h1 className="text-3xl font-semibold tracking-tight">Review the details</h1>
-      <p className="mt-3 text-base leading-7 text-muted">Only the details found on the website are shown.</p>
+      <p className="mt-3 text-base leading-7 text-muted">Check the business, description, products, and region. Use Edit to change anything before you submit.</p>
       <div className="mt-8">
         <ScrapeReview />
       </div>

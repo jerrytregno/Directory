@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { login, requestPasswordReset, resetPassword, signup } from "@/lib/actions/auth";
 import { Field } from "@/components/Field";
+import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 import { Notice } from "@/components/Notice";
+import type { FirebaseWebConfig } from "@/lib/firebase-config";
 import { buttonClass, inputClass } from "@/lib/styles";
 import { initialActionState } from "@/lib/types";
 
@@ -55,10 +57,20 @@ function PasswordInput({
   );
 }
 
-export function LoginForm({ nextPath, passwordReset }: { nextPath: string; passwordReset: boolean }) {
+export function LoginForm({
+  nextPath,
+  passwordReset,
+  firebaseConfig,
+}: {
+  nextPath: string;
+  passwordReset: boolean;
+  firebaseConfig: FirebaseWebConfig | null;
+}) {
   const [state, formAction, pending] = useActionState(login, initialActionState);
 
   return (
+    <div className="space-y-4">
+      {firebaseConfig ? <GoogleAuthButton config={firebaseConfig} nextPath={nextPath} /> : null}
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="next" value={nextPath} />
       {passwordReset ? <Notice tone="success">Your password was updated. Log in with the new one.</Notice> : null}
@@ -78,13 +90,16 @@ export function LoginForm({ nextPath, passwordReset }: { nextPath: string; passw
         </Link>
       </p>
     </form>
+    </div>
   );
 }
 
-export function SignupForm({ nextPath }: { nextPath: string }) {
+export function SignupForm({ nextPath, firebaseConfig }: { nextPath: string; firebaseConfig: FirebaseWebConfig | null }) {
   const [state, formAction, pending] = useActionState(signup, initialActionState);
 
   return (
+    <div className="space-y-4">
+      {firebaseConfig ? <GoogleAuthButton config={firebaseConfig} nextPath={nextPath} /> : null}
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="next" value={nextPath} />
       {state.error ? <Notice tone="error">{state.error}</Notice> : null}
@@ -101,6 +116,7 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
         {pending ? "Creating account..." : "Create account"}
       </button>
     </form>
+    </div>
   );
 }
 

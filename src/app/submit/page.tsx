@@ -24,7 +24,7 @@ export default async function SubmitPage({
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Submit your business</h1>
         <p className="mt-3 text-base leading-7 text-muted">
-          Paste a website. The next page shows the details found there.
+          Paste a website. The next page shows the business, description, products, and region, and you can edit them.
         </p>
         {params.submitted ? (
           <div className="mt-6">

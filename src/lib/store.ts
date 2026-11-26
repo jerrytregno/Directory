@@ -55,6 +55,8 @@ export type ListingRecord = {
   shortDescription: string;
   fullDescription: string;
   features: string;
+  products: string;
+  region: string;
   categoryId: string;
   businessType: string;
   pricingModel: string;
@@ -90,6 +92,8 @@ export type ListingInsert = Omit<
   | "uniqueVisitors"
   | "clickCount"
   | "benefits"
+  | "products"
+  | "region"
   | "pricingDetails"
   | "industry"
   | "tags"
@@ -101,6 +105,8 @@ export type ListingInsert = Omit<
   uniqueVisitors?: number;
   clickCount?: number;
   benefits?: string;
+  products?: string;
+  region?: string;
   pricingDetails?: string;
   industry?: string;
   tags?: string;
@@ -174,6 +180,8 @@ function mapListing(id: string, data: Record<string, unknown>): ListingRecord {
     shortDescription: text(data.shortDescription),
     fullDescription: text(data.fullDescription),
     features: text(data.features),
+    products: text(data.products),
+    region: text(data.region),
     categoryId: text(data.categoryId),
     businessType: text(data.businessType),
     pricingModel: text(data.pricingModel),
@@ -326,6 +334,8 @@ export async function insertListing(db: Firestore, input: ListingInsert) {
       shortDescription: input.shortDescription,
       fullDescription: input.fullDescription,
       features: input.features,
+      products: input.products ?? "",
+      region: input.region ?? "",
       categoryId: input.categoryId,
       businessType: input.businessType,
       pricingModel: input.pricingModel,
